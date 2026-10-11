@@ -1,0 +1,400 @@
+{
+  "unique_routes_per_cluster": [
+    {
+      "cluster": "Tavarakere",
+      "unique_routes": 228
+    },
+    {
+      "cluster": "Unknown",
+      "unique_routes": 196
+    },
+    {
+      "cluster": "Koramangala",
+      "unique_routes": 180
+    },
+    {
+      "cluster": "HSR",
+      "unique_routes": 100
+    },
+    {
+      "cluster": "Electronic City",
+      "unique_routes": 94
+    },
+    {
+      "cluster": "Ecospace",
+      "unique_routes": 86
+    },
+    {
+      "cluster": "Christ/IBC",
+      "unique_routes": 67
+    },
+    {
+      "cluster": "Whitefield",
+      "unique_routes": 58
+    },
+    {
+      "cluster": "BTM",
+      "unique_routes": 56
+    },
+    {
+      "cluster": "Jayanagar Metro",
+      "unique_routes": 44
+    },
+    {
+      "cluster": "Jain",
+      "unique_routes": 42
+    },
+    {
+      "cluster": "Sarjapur",
+      "unique_routes": 40
+    },
+    {
+      "cluster": "Marathahalli",
+      "unique_routes": 37
+    },
+    {
+      "cluster": "Green Glen",
+      "unique_routes": 33
+    },
+    {
+      "cluster": "Bellandur",
+      "unique_routes": 33
+    },
+    {
+      "cluster": "Ecoworld",
+      "unique_routes": 32
+    },
+    {
+      "cluster": "EGL",
+      "unique_routes": 26
+    },
+    {
+      "cluster": "Hosa Road",
+      "unique_routes": 19
+    },
+    {
+      "cluster": "Diamond District",
+      "unique_routes": 18
+    },
+    {
+      "cluster": "Deloitte",
+      "unique_routes": 15
+    },
+    {
+      "cluster": "Intel",
+      "unique_routes": 14
+    },
+    {
+      "cluster": "Silkboard",
+      "unique_routes": 14
+    },
+    {
+      "cluster": "Neeladri Nagar",
+      "unique_routes": 13
+    },
+    {
+      "cluster": "Bannerghatta",
+      "unique_routes": 12
+    },
+    {
+      "cluster": "Arekere",
+      "unique_routes": 10
+    },
+    {
+      "cluster": "Lalbagh",
+      "unique_routes": 10
+    },
+    {
+      "cluster": "Wilson Garden",
+      "unique_routes": 10
+    },
+    {
+      "cluster": "Haralur",
+      "unique_routes": 9
+    },
+    {
+      "cluster": "Adobe",
+      "unique_routes": 8
+    },
+    {
+      "cluster": "Vaishnavi",
+      "unique_routes": 8
+    },
+    {
+      "cluster": "Salarpuria",
+      "unique_routes": 7
+    },
+    {
+      "cluster": "JPMC/Wells Fargo",
+      "unique_routes": 6
+    },
+    {
+      "cluster": "HUB",
+      "unique_routes": 5
+    },
+    {
+      "cluster": "Manipal",
+      "unique_routes": 4
+    },
+    {
+      "cluster": "Bommanahalli",
+      "unique_routes": 3
+    },
+    {
+      "cluster": "WeWork",
+      "unique_routes": 3
+    },
+    {
+      "cluster": "Navi",
+      "unique_routes": 1
+    }
+  ],
+  "start_cluster_counts": [
+    {
+      "cluster": "Tavarakere",
+      "route_count": 117
+    },
+    {
+      "cluster": "Koramangala",
+      "route_count": 90
+    },
+    {
+      "cluster": "Ecospace",
+      "route_count": 84
+    },
+    {
+      "cluster": "HSR",
+      "route_count": 82
+    },
+    {
+      "cluster": "Electronic City",
+      "route_count": 80
+    },
+    {
+      "cluster": "Whitefield",
+      "route_count": 54
+    },
+    {
+      "cluster": "Christ/IBC",
+      "route_count": 49
+    },
+    {
+      "cluster": "Ecoworld",
+      "route_count": 27
+    },
+    {
+      "cluster": "EGL",
+      "route_count": 26
+    },
+    {
+      "cluster": "Jain",
+      "route_count": 22
+    },
+    {
+      "cluster": "Jayanagar Metro",
+      "route_count": 22
+    },
+    {
+      "cluster": "Diamond District",
+      "route_count": 17
+    },
+    {
+      "cluster": "Marathahalli",
+      "route_count": 17
+    },
+    {
+      "cluster": "BTM",
+      "route_count": 15
+    },
+    {
+      "cluster": "Deloitte",
+      "route_count": 14
+    },
+    {
+      "cluster": "Intel",
+      "route_count": 14
+    },
+    {
+      "cluster": "Bellandur",
+      "route_count": 13
+    },
+    {
+      "cluster": "JPMC/Wells Fargo",
+      "route_count": 6
+    },
+    {
+      "cluster": "Green Glen",
+      "route_count": 6
+    },
+    {
+      "cluster": "Adobe",
+      "route_count": 6
+    },
+    {
+      "cluster": "Unknown",
+      "route_count": 6
+    },
+    {
+      "cluster": "Neeladri Nagar",
+      "route_count": 5
+    },
+    {
+      "cluster": "HUB",
+      "route_count": 4
+    },
+    {
+      "cluster": "Salarpuria",
+      "route_count": 4
+    },
+    {
+      "cluster": "WeWork",
+      "route_count": 3
+    },
+    {
+      "cluster": "Manipal",
+      "route_count": 2
+    },
+    {
+      "cluster": "Vaishnavi",
+      "route_count": 2
+    },
+    {
+      "cluster": "Navi",
+      "route_count": 1
+    },
+    {
+      "cluster": "Bommanahalli",
+      "route_count": 1
+    }
+  ],
+  "end_cluster_counts": [
+    {
+      "cluster": "Unknown",
+      "route_count": 193
+    },
+    {
+      "cluster": "Tavarakere",
+      "route_count": 111
+    },
+    {
+      "cluster": "Koramangala",
+      "route_count": 97
+    },
+    {
+      "cluster": "BTM",
+      "route_count": 42
+    },
+    {
+      "cluster": "Sarjapur",
+      "route_count": 40
+    },
+    {
+      "cluster": "Green Glen",
+      "route_count": 27
+    },
+    {
+      "cluster": "Electronic City",
+      "route_count": 23
+    },
+    {
+      "cluster": "Jayanagar Metro",
+      "route_count": 22
+    },
+    {
+      "cluster": "Bellandur",
+      "route_count": 21
+    },
+    {
+      "cluster": "Marathahalli",
+      "route_count": 21
+    },
+    {
+      "cluster": "HSR",
+      "route_count": 21
+    },
+    {
+      "cluster": "Jain",
+      "route_count": 20
+    },
+    {
+      "cluster": "Hosa Road",
+      "route_count": 19
+    },
+    {
+      "cluster": "Christ/IBC",
+      "route_count": 18
+    },
+    {
+      "cluster": "Whitefield",
+      "route_count": 16
+    },
+    {
+      "cluster": "Silkboard",
+      "route_count": 14
+    },
+    {
+      "cluster": "Bannerghatta",
+      "route_count": 12
+    },
+    {
+      "cluster": "Wilson Garden",
+      "route_count": 10
+    },
+    {
+      "cluster": "Lalbagh",
+      "route_count": 10
+    },
+    {
+      "cluster": "Arekere",
+      "route_count": 10
+    },
+    {
+      "cluster": "Haralur",
+      "route_count": 9
+    },
+    {
+      "cluster": "Neeladri Nagar",
+      "route_count": 8
+    },
+    {
+      "cluster": "Vaishnavi",
+      "route_count": 6
+    },
+    {
+      "cluster": "Ecoworld",
+      "route_count": 5
+    },
+    {
+      "cluster": "Salarpuria",
+      "route_count": 3
+    },
+    {
+      "cluster": "Adobe",
+      "route_count": 2
+    },
+    {
+      "cluster": "Bommanahalli",
+      "route_count": 2
+    },
+    {
+      "cluster": "Ecospace",
+      "route_count": 2
+    },
+    {
+      "cluster": "Manipal",
+      "route_count": 2
+    },
+    {
+      "cluster": "HUB",
+      "route_count": 1
+    },
+    {
+      "cluster": "Diamond District",
+      "route_count": 1
+    },
+    {
+      "cluster": "Deloitte",
+      "route_count": 1
+    }
+  ]
+}

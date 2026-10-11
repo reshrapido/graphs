@@ -181,14 +181,12 @@ def summarize(df, lo, hi):
 st.set_page_config(page_title="Auto Shuttle pooling", layout="wide")
 st.title("Auto Shuttle pooling dashboard")
 
-with st.sidebar:
-    st.header("Data")
-    path = st.text_input("JSON path", value=DEFAULT_JSON)
-
+# Load data (hard-coded path)
+path = DEFAULT_JSON
 if not os.path.isfile(path):
-    st.info(
-        "Run `uv run preprocess.py` first, then put `dashboard_data.json` "
-        "next to this script (or enter the correct path above)."
+    st.error(
+        f"`{path}` not found. Run `uv run preprocess.py` first and make sure "
+        "the file is next to this script."
     )
     st.stop()
 
@@ -246,32 +244,6 @@ if view.empty:
     st.warning("No data for this combination of filters.")
     st.stop()
 
-# ---- Data check ----
-with st.expander("Data check (open this first)"):
-    c1, c2, c3, c4 = st.columns(4)
-    c1.metric("Input", meta.get("mode", "pre-aggregated"))
-    c2.metric("Rows read", f"{meta.get('raw_rows', 0):,}")
-    c3.metric("Duplicate order IDs dropped", f"{meta.get('dup_removed', 0):,}")
-    c4.metric("Rows with bad dates", f"{meta.get('bad_dates', 0):,}")
-    st.write(
-        f"Dates: {dmin.date()} to {dmax.date()}  |  "
-        f"Pickup areas: {len(all_pick)}  |  "
-        f"Net-ride statuses: {sorted(NET_STATUSES)}"
-    )
-    if meta.get("status_counts"):
-        st.write(
-            "Status values found (expected: dropped, COBRM, COBRA, OCARA; "
-            "anything else is counted in gross orders only):"
-        )
-        st.dataframe(pd.Series(meta["status_counts"], name="orders").to_frame())
-    if meta.get("dup_removed", 0) > 0:
-        st.warning(
-            "Duplicate order IDs were found, so the file may hold several rows "
-            "per order (event log). Only the first row per order was kept."
-        )
-    if not has_pool:
-        st.warning("No pooled rides detected.")
-
 # ---- KPI row ----
 ts = timeseries(view, hourly)
 xmin, xmax = ts["ts"].min().normalize(), ts["ts"].max().normalize()
@@ -292,8 +264,8 @@ k5.metric(
 )
 
 # ---- Tabs ----
-tab_trend, tab_pool, tab_phase, tab_week, tab_range, tab_area = st.tabs(
-    ["Trends", "Pool vs solo", "Phase comparison", "Weekday overlay", "Range A vs B", "By area"]
+tab_trend, tab_pool, tab_phase, tab_range, tab_area = st.tabs(
+    ["Trends", "Pool vs solo", "Phase comparison", "Range A vs B", "By area"]
 )
 
 # ---------------------------------------------------------------- Trends
@@ -313,71 +285,29 @@ with tab_trend:
     fig.update_layout(height=420, legend_title_text="", yaxis_title="orders", xaxis_title="")
     st.plotly_chart(shade(fig, xmin, xmax, jit, rb), use_container_width=True)
 
-    rate_opts = [c for c in RATE_LABELS if c not in ("pool_share", "pax_per_trip") and has(plot, c)]
-    chosen = st.multiselect(
-        "Rates",
-        rate_opts,
-        default=rate_opts[:2],
-        format_func=lambda c: RATE_LABELS[c],
-    )
-    if chosen:
-        rl = plot.melt(id_vars="ts", value_vars=chosen, var_name="metric", value_name="value")
-        rl["metric"] = rl["metric"].map(RATE_LABELS)
-        fig = px.line(rl, x="ts", y="value", color="metric", markers=not hourly)
-        fig.update_layout(
-            height=380,
-            legend_title_text="",
-            yaxis_tickformat=".0%",
-            yaxis_title="",
-            xaxis_title="",
-        )
-        st.plotly_chart(shade(fig, xmin, xmax, jit, rb), use_container_width=True)
-
 # ------------------------------------------------------------- Pool vs solo
 with tab_pool:
     if not has_pool:
         st.info("No pool data available.")
     else:
-        mode = st.radio("Show", ["Share (%)", "Counts"], horizontal=True)
-        long = ts.melt(
-            id_vars="ts",
-            value_vars=["pooled_rides", "solo_rides"],
-            var_name="type",
-            value_name="rides",
-        )
-        long["type"] = long["type"].map({"pooled_rides": "Pooled", "solo_rides": "Solo"})
-
-        if mode.startswith("Share"):
-            totals = long.groupby("ts")["rides"].transform("sum")
-            long = long.copy()
-            long["rides"] = (long["rides"] / totals.replace(0, np.nan) * 100).fillna(0)
-
-        fig = px.bar(
-            long,
-            x="ts",
-            y="rides",
+        # Pie chart of Pooled vs Solo
+        pooled = view["pooled_rides"].sum()
+        solo = view["solo_rides"].sum()
+        pie_df = pd.DataFrame({
+            "type": ["Pooled", "Solo"],
+            "rides": [pooled, solo],
+        })
+        fig = px.pie(
+            pie_df,
+            names="type",
+            values="rides",
             color="type",
             color_discrete_map={"Pooled": "#54A24B", "Solo": "#E45756"},
-            barmode="stack",
+            hole=0.35,
         )
-        fig.update_layout(
-            height=430,
-            legend_title_text="",
-            xaxis_title="",
-            yaxis_title="% of net rides" if mode.startswith("Share") else "rides",
-        )
-        if mode.startswith("Share"):
-            fig.update_layout(yaxis_ticksuffix="%")
-        st.plotly_chart(shade(fig, xmin, xmax, jit, rb), use_container_width=True)
-
-        if has(ts, "pax_per_trip"):
-            fig = px.line(ts, x="ts", y="pax_per_trip", markers=not hourly)
-            fig.update_layout(
-                height=300,
-                xaxis_title="",
-                yaxis_title="passengers per vehicle trip",
-            )
-            st.plotly_chart(shade(fig, xmin, xmax, jit, rb), use_container_width=True)
+        fig.update_traces(textposition="inside", textinfo="percent+label")
+        fig.update_layout(height=420, showlegend=True, legend_title_text="")
+        st.plotly_chart(fig, use_container_width=True)
 
 # ------------------------------------------------------- Phase comparison
 with tab_phase:
@@ -403,62 +333,9 @@ with tab_phase:
         "Passengers / trip": rat["pax_per_trip"].round(2),
     })
     st.dataframe(table.dropna(axis=1, how="all"))
-
-    per_day = pd.DataFrame({
-        "Gross": g["gross_orders"] / days,
-        "Propagated": g["propagated_orders"] / days,
-        "Net rides": g["net_rides"] / days,
-    }).reset_index().melt(id_vars="phase", var_name="metric", value_name="per day")
-    fig = px.bar(
-        per_day,
-        x="metric",
-        y="per day",
-        color="phase",
-        barmode="group",
-        color_discrete_map=PHASE_COLORS,
-        category_orders={"phase": list(PHASE_NAMES)},
-    )
-    fig.update_layout(height=380, xaxis_title="", legend_title_text="")
-    st.plotly_chart(fig, use_container_width=True)
     st.caption(
         "Averages are totals divided by days that have data in the selected range. "
         "Rates are computed from totals, not averaged day by day."
-    )
-
-# --------------------------------------------------------- Weekday overlay
-with tab_week:
-    wd = timeseries(view, hourly=False)
-    opts = {**COUNT_LABELS, **RATE_LABELS}
-    avail = [c for c in opts if has(wd, c)]
-    metric = st.selectbox(
-        "Metric",
-        avail,
-        index=avail.index("net_rides") if "net_rides" in avail else 0,
-        format_func=lambda c: opts[c],
-    )
-    wd["weekday"] = wd["date"].dt.dayofweek.map(dict(enumerate(WEEKDAYS)))
-    wk_start = wd["date"] - pd.to_timedelta(wd["date"].dt.dayofweek, unit="D")
-    wd["week"] = "Week of " + wk_start.dt.strftime("%Y-%m-%d")
-    fig = px.line(
-        wd,
-        x="weekday",
-        y=metric,
-        color="week",
-        markers=True,
-        category_orders={"weekday": WEEKDAYS},
-    )
-    fig.update_layout(
-        height=450,
-        xaxis_title="",
-        yaxis_title=opts[metric],
-        legend_title_text="",
-    )
-    if metric in RATE_LABELS and metric != "pax_per_trip":
-        fig.update_layout(yaxis_tickformat=".0%")
-    st.plotly_chart(fig, use_container_width=True)
-    st.caption(
-        "Each line is one calendar week (Monday start), so a Tuesday under one "
-        "policy sits directly over a Tuesday under another."
     )
 
 # ------------------------------------------------------------ Range A vs B
@@ -496,85 +373,81 @@ with tab_range:
                 a, b = sa[k], sb[k]
                 if a is None or b is None or pd.isna(a) or pd.isna(b):
                     continue
-                if k.endswith("%"):
-                    change = f"{b - a:+.1f} pts"
-                elif a != 0:
-                    change = f"{(b - a) / a:+.1%}"
-                else:
-                    change = "n/a"
                 rows.append({
                     "Metric": k,
                     "Range A": round(a, 2),
                     "Range B": round(b, 2),
-                    "Change (B vs A)": change,
                 })
             st.dataframe(pd.DataFrame(rows), hide_index=True)
 
-            keys = ["Gross orders / day", "Propagated / day", "Net rides / day"]
-            comp = pd.DataFrame({
-                "metric": keys,
-                "Range A": [sa[k] for k in keys],
-                "Range B": [sb[k] for k in keys],
-            })
-            comp = comp.melt(id_vars="metric", var_name="range", value_name="per day")
-            fig = px.bar(comp, x="metric", y="per day", color="range", barmode="group")
-            fig.update_layout(height=360, xaxis_title="", legend_title_text="")
-            st.plotly_chart(fig, use_container_width=True)
-
 # ----------------------------------------------------------------- By area
 with tab_area:
-    n_top = st.slider("Number of areas (ranked by net rides)", 3, 30, 9)
-    opts = {
-        **COUNT_LABELS,
-        "pool_share": RATE_LABELS["pool_share"],
-        "completion_rate": RATE_LABELS["completion_rate"],
-        "propagation_rate": RATE_LABELS["propagation_rate"],
-    }
-    avail = [c for c in opts if has(view, c) or c in RATE_LABELS]
-    metric = st.selectbox(
-        "Metric",
-        avail,
-        index=avail.index("net_rides") if "net_rides" in avail else 0,
-        format_func=lambda c: opts[c],
-        key="area_metric",
+    # ---- Net rides contribution by cluster (from order data) ----
+    area_contrib = (
+        view.groupby("pickup_cluster", as_index=False)
+        .agg(
+            gross_rides=("gross_orders", "sum"),
+            net_rides=("net_rides", "sum"),
+        )
+        .sort_values("gross_rides", ascending=False)   # table ordered by gross
+        .reset_index(drop=True)
     )
-    top = view.groupby("pickup_cluster")["net_rides"].sum().nlargest(n_top).index
-    ad = view[view["pickup_cluster"].isin(top)]
-    ad = add_ratios(
-        ad.groupby(["date", "pickup_cluster"], as_index=False)[SUM_COLS].sum(min_count=1)
+    area_contrib = area_contrib.rename(columns={"pickup_cluster": "Cluster"})
+
+    # Try to attach route counts where the name matches
+    route_json_path = "route_cluster_counts.json"
+    if os.path.isfile(route_json_path):
+        with open(route_json_path, "r", encoding="utf-8") as f:
+            route_data = json.load(f)
+        route_df = pd.DataFrame(route_data["unique_routes_per_cluster"])
+        route_df["key"] = route_df["cluster"].str.strip().str.lower()
+        area_contrib["key"] = area_contrib["Cluster"].str.strip().str.lower()
+        area_contrib = area_contrib.merge(
+            route_df[["key", "unique_routes"]],
+            on="key",
+            how="left",
+        )
+        area_contrib["unique_routes"] = area_contrib["unique_routes"].fillna(0).astype(int)
+        area_contrib = area_contrib.drop(columns=["key"])
+    else:
+        area_contrib["unique_routes"] = 0
+
+    # ---------- Slider ----------
+    n_top = st.slider("Show top N clusters (rest grouped as Others)", 5, 30, 12)
+
+    # ---------- Title + Pie chart ----------
+    st.subheader("Net rides contribution by cluster")
+
+    pie_df = area_contrib.copy()
+    if len(pie_df) > n_top:
+        top = pie_df.head(n_top)
+        others = pd.DataFrame({
+            "Cluster": ["Others"],
+            "net_rides": [pie_df["net_rides"].iloc[n_top:].sum()],
+            "gross_rides": [pie_df["gross_rides"].iloc[n_top:].sum()],
+            "unique_routes": [pie_df["unique_routes"].iloc[n_top:].sum()],
+        })
+        pie_df = pd.concat([top, others], ignore_index=True)
+
+    fig = px.pie(
+        pie_df,
+        names="Cluster",
+        values="net_rides",
+        hole=0.35,
     )
-    fig = px.line(
-        ad,
-        x="date",
-        y=metric,
-        facet_col="pickup_cluster",
-        facet_col_wrap=3,
-        markers=True,
-        height=max(320, 230 * int(np.ceil(len(top) / 3))),
-    )
-    fig.update_yaxes(matches=None, showticklabels=True)
-    fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
-    if metric in RATE_LABELS:
-        fig.update_layout(yaxis_tickformat=".0%")
-    shade(fig, view["date"].min(), view["date"].max(), jit, rb, annotate=False, row="all", col="all")
+    fig.update_traces(textposition="inside", textinfo="percent+label")
+    fig.update_layout(height=520, showlegend=True, legend_title_text="Cluster")
     st.plotly_chart(fig, use_container_width=True)
 
-    if has_pool:
-        st.subheader("Pool share by area and phase")
-        ph = view.copy()
-        ph["phase"] = phase_of(ph["date"], jit, rb)
-        ph = ph.groupby(["pickup_cluster", "phase"], as_index=False)[SUM_COLS].sum(min_count=1)
-        ph = add_ratios(ph)
-        ph = ph[ph["pickup_cluster"].isin(top)]
-        piv = ph.pivot(index="pickup_cluster", columns="phase", values="pool_share")
-        piv = piv[[p for p in PHASE_NAMES if p in piv.columns]]
-        fig = px.imshow(
-            piv,
-            text_auto=".0%",
-            aspect="auto",
-            color_continuous_scale="RdYlGn",
-            zmin=0,
-            zmax=1,
-        )
-        fig.update_layout(height=max(300, 32 * len(piv)), xaxis_title="", yaxis_title="")
-        st.plotly_chart(fig, use_container_width=True)
+    # ---------- Table (already sorted by gross_rides desc) ----------
+    st.subheader("Cluster level data")
+    table_df = area_contrib.rename(columns={
+        "gross_rides": "Gross rides",
+        "net_rides": "Net rides",
+        "unique_routes": "Route count",
+    })
+    st.dataframe(
+        table_df[["Cluster", "Route count", "Gross rides", "Net rides"]],
+        hide_index=True,
+        use_container_width=True,
+    )
